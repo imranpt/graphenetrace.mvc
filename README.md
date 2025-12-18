@@ -56,37 +56,39 @@ Individual Project
 ---
 
 
-## Project Structure
+## 🗂️ Project Structure
 
+```
 Project
 │
 ├── Controllers
-│ ├── AuthController.cs
-│ ├── UsersController.cs
-│ ├── ClinicianController.cs
-│ └── PatientController.cs
+│   ├── AuthController.cs
+│   ├── UsersController.cs
+│   ├── ClinicianController.cs
+│   └── PatientController.cs
 │
 ├── Models
-│ ├── User.cs
-│ ├── Patient.cs
-│ ├── PressureFrame.cs
+│   ├── User.cs
+│   ├── Patient.cs
+│   └── PressureFrame.cs
 │
 ├── Views
-│ ├── Auth
-│ ├── Users
-│ ├── Clinician
-│ ├── Patient
+│   ├── Auth
+│   ├── Users
+│   ├── Clinician
+│   └── Patient
 │
 ├── Data
-│ └── AppDBContext.cs
+│   └── AppDBContext.cs
 │
 ├── Migrations
 ├── wwwroot
-│ ├── css
-│ ├── js
-│ └── images
+│   ├── css
+│   ├── js
+│   └── images
 │
 └── Program.cs
+```
 
 ---
 
