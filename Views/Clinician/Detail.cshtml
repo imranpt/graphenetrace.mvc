@@ -1,0 +1,367 @@
+﻿@model Project.Models.ClinicianPatientViewModel
+
+
+@{
+    ViewData["Title"] = "Patient Detail";
+}
+<style>
+    .heatmap-card {
+        max-width: 380px;
+        padding: 16px;
+        border-radius: 16px;
+        background: #ffffff;
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+        border: 1px solid #e3e3e3;
+        margin-bottom: 24px;
+    }
+
+    .heatmap-container {
+        width: 340px;
+        height: 340px;
+        border-radius: 12px;
+        overflow: hidden;
+        background: radial-gradient(circle at top, #003cff, #001246);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    #heatmapCanvas {
+        width: 100%;
+        height: 100%;
+    }
+
+    .heatmap-legend {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 14px;
+        margin-top: 10px;
+    }
+
+    .heatmap-legend span {
+        color: #555;
+        font-weight: 500;
+    }
+
+    .legend-bar {
+        flex: 1;
+        height: 10px;
+        border-radius: 999px;
+        background: linear-gradient(to right, #0000ff, #00ffff, #00ff00, #ffff00, #ff0000);
+        border: 1px solid #ccc;
+    }
+</style>
+
+
+<a asp-controller="Clinician" asp-action="Dashboard" class="btn btn-danger mb-3">
+    ← Back to Dashboard
+</a>
+
+<h2>@Model.Patient.Name — Details</h2>
+
+
+<hr />
+
+
+<h3>Pressure Heatmap</h3>
+
+<div class="heatmap-card">
+    <div class="heatmap-container">
+       <canvas id="heatmapCanvas" width="340" height="340"></canvas>
+
+    </div>
+
+    <div class="heatmap-legend mt-2">
+        <span>Low</span>
+        <div class="legend-bar"></div>
+        <span>High</span>
+    </div>
+</div>
+
+
+
+
+<script>
+    // Read matrix safely as a JSON string
+    const rawJson = '@Html.Raw(Model.LatestMatrixJson ?? "[]")';
+    let matrix = [];
+
+    try {
+        matrix = JSON.parse(rawJson);
+    } catch (e) {
+        console.error("Matrix JSON failed to parse:", e);
+        matrix = [];
+    }
+
+    if (!Array.isArray(matrix) || matrix.length === 0) {
+        console.log("No matrix to display");
+    } else {
+
+const canvas = document.getElementById("heatmapCanvas");
+const ctx = canvas.getContext("2d");
+
+    const rows = matrix.length;
+    const cols = matrix[0].length;
+
+
+    const cellSize = canvas.width / cols;
+
+function getColor(pressure) {
+    const MAX_PRESSURE = 600; // fixed clinical scale
+
+    // Normalise to 0–1
+    const normalized = Math.min(Math.max(pressure / MAX_PRESSURE, 0), 1);
+
+    let r = 0, g = 0, b = 0;
+
+    if (normalized < 0.25) {
+        // Blue → Cyan
+        r = 0;
+        g = Math.floor(255 * (normalized / 0.25));
+        b = 255;
+    } else if (normalized < 0.5) {
+        // Cyan → Green
+        r = 0;
+        g = 255;
+        b = Math.floor(255 * (1 - (normalized - 0.25) / 0.25));
+    } else if (normalized < 0.75) {
+        // Green → Yellow
+        r = Math.floor(255 * ((normalized - 0.5) / 0.25));
+        g = 255;
+        b = 0;
+    } else {
+        // Yellow → Red
+        r = 255;
+        g = Math.floor(255 * (1 - (normalized - 0.75) / 0.25));
+        b = 0;
+    }
+
+    return `rgb(${r}, ${g}, ${b})`;
+}
+
+
+for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+        ctx.fillStyle = getColor(matrix[r][c]);
+        ctx.fillRect(c * cellSize, r * cellSize, cellSize, cellSize);
+    }
+}
+
+
+    }
+</script>
+
+@if (!Model.Frames.Any())
+{
+    <p>No pressure data uploaded yet.</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Timestamp</th>
+                <th>Peak Pressure</th>
+                <th>Contact Area</th>
+                <th>Risk</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            @foreach (var f in Model.Frames)
+            {
+                <tr>
+                    <td>@f.Timestamp</td>
+                    <td>@f.PeakPressure</td>
+                    <td>@f.ContactAreaPercent %</td>
+
+                    <td>
+                        @{
+                            string risk = f.PeakPressure > 180 ? "Critical" :
+                            f.PeakPressure > 120 ? "Warning" :
+                            "Normal";
+                        }
+                        @risk
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+<div class="card shadow p-4 mb-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="mb-0">Metrics Over Time</h4>
+
+        <div class="input-group input-group-sm" style="width: 190px;">
+            <label class="input-group-text">Timeline</label>
+            <select id="timelineSelect" class="form-select">
+                <option value="1">Last 1h</option>
+                <option value="6" selected>Last 6h</option>
+                <option value="24">Last 24h</option>
+                <option value="all">All</option>
+            </select>
+        </div>
+    </div>
+
+     <canvas id="metricsChart" height="150"></canvas>
+
+    <input id="timeSlider" type="range"
+           class="form-range mt-3"
+           min="0" max="0" value="0" />
+
+    <div class="text-center mt-2 text-muted">
+        Showing up to: <span id="timeLabel">-</span>
+    </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    // ---- 1) Pull frames from C# (ISO for dates) ----
+    const rawFrames = @Html.Raw(
+        System.Text.Json.JsonSerializer.Serialize(
+            Model.Frames.Select(f => new {
+                Timestamp = f.Timestamp.ToString("o"), // ISO string
+                Peak = f.PeakPressure,
+                Area = f.ContactAreaPercent
+            })
+        )
+    );
+
+    rawFrames.sort((a, b) => new Date(a.Timestamp) - new Date(b.Timestamp));
+
+    if (!rawFrames || rawFrames.length === 0) {
+        console.warn("No frames available for chart.");
+        return;
+    }
+
+    // Convert to JS arrays
+    const dates = rawFrames.map(f => new Date(f.Timestamp));
+    const peaks = rawFrames.map(f => f.Peak);
+    const areas = rawFrames.map(f => f.Area);
+
+    // Helper to format label text
+    function formatLabel(dt) {
+        return dt.toLocaleTimeString("en-GB", {
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: false
+        });
+    }
+
+    const slider = document.getElementById("timeSlider");
+    const timeLabel = document.getElementById("timeLabel");
+    const timelineSelect = document.getElementById("timelineSelect");
+    const ctx = document.getElementById("metricsChart").getContext("2d");
+
+    // ---- 2) Basic Chart.js line chart (category axis, no time adapter) ----
+    const chart = new Chart(ctx, {
+        type: "line",
+        data: {
+            labels: [],
+            datasets: [
+                {
+                    label: "Peak Pressure",
+                    data: [],
+                    borderColor: "#FF4D4D",
+                    backgroundColor: "rgba(255,77,77,0.25)",
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.4
+                },
+                {
+                    label: "Contact Area %",
+                    data: [],
+                    borderColor: "#4D88FF",
+                    backgroundColor: "rgba(77,136,255,0.25)",
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.4
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            animation: false,
+            scales: {
+                x: {
+                    grid: { display: false },      // simple category axis
+                    ticks: { autoSkip: true }
+                },
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+
+    // ---- 3) Timeline → compute window indexes using Date objects ----
+    function getWindow(hours) {
+        if (hours === "all") {
+            return [0, dates.length - 1];
+        }
+
+        const hrs = parseInt(hours);
+        const last = dates[dates.length - 1];
+        const cutoff = new Date(last.getTime() - hrs * 60 * 60 * 1000);
+
+        let start = dates.findIndex(d => d >= cutoff);
+        if (start === -1) start = 0;
+
+        return [start, dates.length - 1];
+    }
+
+    // ---- 4) Update chart based on slider position in current window ----
+    function updateForSlider(start, end, sliderPos) {
+        const endIndex = start + sliderPos;
+
+        const sliceDates = dates.slice(start, endIndex + 1);
+        const sliceLabels = sliceDates.map(formatLabel);
+        const slicePeaks  = peaks.slice(start, endIndex + 1);
+        const sliceAreas  = areas.slice(start, endIndex + 1);
+
+        chart.data.labels = sliceLabels;
+        chart.data.datasets[0].data = slicePeaks;
+        chart.data.datasets[1].data = sliceAreas;
+        chart.update();
+
+        if (sliceDates.length > 0) {
+            timeLabel.textContent = formatLabel(sliceDates[sliceDates.length - 1]);
+        } else {
+            timeLabel.textContent = "-";
+        }
+    }
+
+    // ---- 5) When timeline changes ----
+    function applyTimeline() {
+        const selected = timelineSelect.value; // "1", "6", "24", "all"
+        const [start, end] = getWindow(selected);
+
+        const windowSize = end - start + 1;
+
+        slider.min = 0;
+        slider.max = Math.max(windowSize - 1, 0);
+        slider.value = slider.max;
+
+        updateForSlider(start, end, parseInt(slider.value));
+    }
+
+    // Slider scrubbing
+    slider.addEventListener("input", function () {
+        const [start, end] = getWindow(timelineSelect.value);
+        updateForSlider(start, end, parseInt(this.value));
+    });
+
+    // Timeline dropdown
+    timelineSelect.addEventListener("change", applyTimeline);
+
+    // ---- 6) Initial draw ----
+    applyTimeline();
+
+    // If literally only one frame, disable slider
+    if (dates.length <= 1) {
+        slider.disabled = true;
+    }
+});
+</script>

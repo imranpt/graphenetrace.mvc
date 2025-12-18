@@ -1,0 +1,32 @@
+﻿@model IEnumerable<Project.Models.Patient>
+
+
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Patients";
+}
+
+<h2>Patient List</h2>
+
+<a asp-action="Create" class="btn btn-primary">Add Patient</a>
+
+<table class="table">
+    <tr>
+        <th>Name</th>
+        <th>Condition</th>
+        <th>Actions</th>
+    </tr>
+
+    @foreach (var p in Model)
+    {
+        <tr>
+            <td>@p.Name</td>
+            <td>@p.Condition</td>
+            <td>
+                <a asp-action="Edit" asp-route-id="@p.Id">Edit</a> |
+                <a asp-action="Delete" asp-route-id="@p.Id">Delete</a>
+            </td>
+        </tr>
+    }
+</table>
+

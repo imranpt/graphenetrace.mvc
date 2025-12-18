@@ -1,0 +1,78 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Graphanetrace</title>
+
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/Project.styles.css" asp-append-version="true" />
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body class="app-body">
+    <!-- Background image overlay -->
+    <div class="bg-overlay"></div>
+
+    @using Microsoft.AspNetCore.Http
+    @{
+        var role = Context.Session.GetString("Role");
+    }
+
+    <header>
+        <nav class="navbar navbar-expand-sm navbar-light border-bottom mb-4">
+            <div class="container-fluid">
+                <span class="navbar-brand fw-bold fs-4">
+                    Graphanetrace
+                </span>
+
+
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse"
+                        aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+                    <ul class="navbar-nav flex-grow-1">
+                       
+                        @if (role == "Admin")
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Users" asp-action="Index">Users</a>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Main content appears as a card on every page -->
+    @if (ViewData["Title"]?.ToString() == "Login")
+         {
+        <main class="container">
+            @RenderBody()
+        </main>
+}
+else
+{
+        <main class="container content-card">
+            @RenderBody()
+        </main>
+}
+
+    <footer class="footer text-muted mt-5">
+        <div class="container text-center">
+            &copy; 2025 - Graphanetrace
+        </div>
+    </footer>
+
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

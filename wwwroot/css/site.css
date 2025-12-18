@@ -1,0 +1,146 @@
+html {
+    font-size: 14px;
+}
+
+@media (min-width: 768px) {
+    html {
+        font-size: 16px;
+    }
+}
+
+/* Focus outline (keep for accessibility) */
+.btn:focus,
+.btn:active:focus,
+.btn-link.nav-link:focus,
+.form-control:focus,
+.form-check-input:focus {
+    box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+}
+
+html {
+    position: relative;
+    min-height: 100%;
+}
+
+/* ===== NEW UI THEME ===== */
+
+/* Grey background for the whole app */
+.app-body {
+    min-height: 100vh;
+    background-color: #f4f6f8;
+    position: relative;
+    font-family: "Segoe UI", Arial, sans-serif;
+    margin-bottom: 0; /* footer spacing handled below */
+}
+
+/* Wheelchair background overlay */
+.bg-overlay {
+    position: fixed;
+    inset: 0;
+    background-image: url("/images/wheelchair.jpg");
+    background-size: cover;
+    background-position: center;
+    opacity: 0.08;
+    z-index: -1;
+    pointer-events: none; 
+}
+
+/* Main content card (applies to all pages) */
+.content-card {
+    background: #ffffff;
+    padding: 32px;
+    border-radius: 16px;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08);
+    margin-bottom: 120px; 
+}
+
+
+/* Navbar clean look */
+.navbar {
+    background-color: transparent !important;
+}
+
+.navbar-brand {
+    color: #111827 !important;
+    letter-spacing: 0.2px;
+}
+
+.nav-link {
+    color: #111827 !important;
+    font-weight: 500;
+}
+
+    .nav-link:hover {
+        text-decoration: underline;
+    }
+
+/* Headings */
+h1, h2, h3, h4 {
+    color: #1f2937;
+    font-weight: 700;
+}
+
+/* Tables (makes admin lists look better) */
+table {
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+th {
+    background-color: #1f2937 !important;
+    color: #ffffff !important;
+}
+
+/* Buttons (keep bootstrap but nicer) */
+.btn-primary {
+    background-color: #2563eb;
+    border: none;
+}
+
+.btn-danger {
+    background-color: #dc2626;
+    border: none;
+}
+
+/* Footer */
+.footer {
+    padding: 20px 0;
+    font-size: 0.9rem;
+    position: relative;
+    z-index: 1;
+}
+
+
+/* Give pages breathing space */
+.container {
+    margin-top: 10px;
+    position: relative;
+    z-index: 2; 
+}
+
+
+/* Optional: make form controls feel modern */
+.form-control {
+    border-radius: 10px;
+}
+/*login*/
+.login-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    margin-top: 120px;
+}
+
+.login-box {
+    width: 340px; /* controls square size */
+    padding: 28px;
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.18);
+}
+
+    .login-box h3 {
+        text-align: center;
+        margin-bottom: 20px;
+    }

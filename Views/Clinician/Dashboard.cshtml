@@ -1,0 +1,87 @@
+﻿@model IEnumerable<Project.Models.ClinicianPatientViewModel>
+
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Clinician Dashboard";
+}
+<a asp-controller="Auth"
+   asp-action="Logout"
+   class="btn btn-danger">
+    Logout
+</a>
+<h3>Upload Pressure Data (CSV)</h3>
+
+
+<form method="post" enctype="multipart/form-data" asp-action="UploadCsv" asp-controller="Clinician">
+
+    <label>Select Patient</label>
+    <select name="patientId" class="form-control" required>
+        @foreach (var p in Model)
+        {
+            <option value="@p.Patient.Id">@p.Patient.Name</option>
+        }
+    </select>
+
+    <br />
+
+    <label>Select CSV File</label>
+    <input type="file" name="file" class="form-control" required />
+
+    <br />
+
+    <button type="submit" class="btn btn-primary">Upload CSV</button>
+</form>
+
+<hr />
+
+<h1>Clinician Dashboard</h1>
+<p>Welcome Clinician!</p>
+
+<h3>Patients</h3>
+
+@if (Model == null || !Model.Any())
+{
+    <p>No patients found.</p>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Latest Peak Pressure</th>
+                <th>Contact Area %</th>
+                <th>Risk Level</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            @foreach (var p in Model)
+            {
+                <tr>
+                    <td>@p.Patient.Name</td>
+                    <td>@p.PeakPressure</td>
+                    <td>@p.ContactArea</td>
+                    <td>
+                        <span class="badge
+                                        @(p.RiskLevel == "High" ? "bg-danger" :
+                                                                p.RiskLevel == "Medium" ? "bg-warning" : "bg-success")">
+                    @p.RiskLevel
+                </span>
+            </td>
+            <td>
+                <a asp-action="Detail"
+                   asp-route-id="@p.Patient.Id"
+                   class="btn btn-sm btn-primary">
+                    View Details
+                </a>
+            </td>
+        </tr>
+                }
+        </tbody>
+    </table>
+}
+
+<br />
+

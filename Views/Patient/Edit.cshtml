@@ -1,0 +1,23 @@
+﻿@model Project.Models.Patient
+
+
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Edit Patient</h2>
+
+<form asp-action="Edit" method="post">
+    <input type="hidden" asp-for="Id" />
+
+    <label>Name</label>
+    <input asp-for="Name" class="form-control" />
+
+    <label>Condition</label>
+    <input asp-for="Condition" class="form-control" />
+
+    <label>Clinician Notes</label>
+    <textarea asp-for="ClinicianNotes" class="form-control"></textarea>
+
+    <button type="submit" class="btn btn-success mt-2">Update</button>
+</form>
